@@ -1,0 +1,5 @@
+profile: service
+defaultPackage: com.accuracysoftawre
+---
+testFramework: spock
+sourceLanguage: groovy
