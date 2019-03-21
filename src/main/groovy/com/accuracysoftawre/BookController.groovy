@@ -13,8 +13,22 @@ import grails.gorm.annotation.Entity
 @Entity
 class Book {
   static graphql = true
-  String name
-  String author
+  static hasMany = [authors: Author]
+  static belongsTo = Author 
+
+  static mapping = {
+    authors lazy: false
+  }
+
+  String title
+}
+
+@Entity
+class Author {
+  static graphql = true
+
+  String fullName
+  static hasMany = [books: Book]
 }
 
 @Transactional

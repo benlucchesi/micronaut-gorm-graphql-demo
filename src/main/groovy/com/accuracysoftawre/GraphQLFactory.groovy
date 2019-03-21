@@ -46,6 +46,8 @@ class AuthenticationCheck extends BaseGraphQLFetcherInterceptor {
   // boolean	onCustomQuery(java.lang.String name, DataFetchingEnvironment environment)
   // boolean	onMutation(DataFetchingEnvironment environment, GraphQLDataFetcherType type)
   boolean	onQuery(DataFetchingEnvironment environment, GraphQLDataFetcherType type){
+    
+    println "called for .... " + type
     // println environment
     // println type
     // throw new RuntimeException("access denied")
@@ -69,6 +71,7 @@ class GraphQLFactory {
 
       // configure security interceptors here....
       interceptorManager.registerInterceptor(Book, new AuthenticationCheck() )
+      interceptorManager.registerInterceptor(Author, new AuthenticationCheck() )
 
       GraphQLSchema graphQLSchema = schema.generate()
 
