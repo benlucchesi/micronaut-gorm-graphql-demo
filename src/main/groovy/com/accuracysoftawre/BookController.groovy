@@ -9,33 +9,71 @@ import io.micronaut.http.HttpResponse
 
 import grails.gorm.transactions.Transactional
 import grails.gorm.annotation.Entity
+import org.grails.datastore.gorm.GormEntity
+
 
 @Entity
-class Book {
+class Book implements GormEntity<Book> { 
   static graphql = true
-  static hasMany = [authors: Author]
-  static belongsTo = Author 
-
+  static hasMany = [authors: Author, keyWords: String]
+  static hasOne = [isbn:ISBN]
+  static belongsTo = [authors: Author]
+  
   static mapping = {
     authors lazy: false
+    keyWords lazy: false
+    isbn lazy: false
   }
 
+  static constraints = {
+    // title unique: true
+  }
+
+  Library library
+
   String title
+  List<String> keyWords = []
 }
 
 @Entity
 class Author {
-  static graphql = true
 
-  String fullName
+  static graphql = true
+  static mapping = {
+    books lazy: false
+  }
+  static embedded = ["address"]
   static hasMany = [books: Book]
+  String fullName
+  Address address
+}
+
+@Entity
+class ISBN {
+  static graphql = true
+  String encodedNumber
+  String region
+  Book book   
+}
+
+@Entity
+class Library {
+  static graphql = true
+  String name
+  // static hasMany = [books: Book]
+  static hasMany = [addresses: Address, keyWords: String]
+  static embedded = ["keyWords"]
+  // List<Address> addresses
+}
+
+@Entity
+class Address {
+  String street
 }
 
 @Transactional
 @Controller("/book")
 class BookController {
-
-    
 
     @Get("/")
     HttpStatus index() {

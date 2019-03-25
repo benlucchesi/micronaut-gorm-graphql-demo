@@ -57,6 +57,9 @@ dependencies {
     // graphql stuff
     compile "io.micronaut.graphql:micronaut-graphql:1.0.0.RC1"
     compile "org.grails:gorm-graphql:1.0.2"
+
+
+    runtime "org.grails:grails-core:4.0.0.M1"
 }
 
 shadowJar {

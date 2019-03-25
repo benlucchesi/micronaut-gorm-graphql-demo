@@ -40,6 +40,11 @@ import org.grails.gorm.graphql.interceptor.impl.BaseGraphQLFetcherInterceptor
 import graphql.schema.DataFetchingEnvironment
 import org.grails.gorm.graphql.fetcher.GraphQLDataFetcherType
 
+import org.grails.gorm.graphql.binding.manager.GraphQLDataBinderManager
+import org.grails.gorm.graphql.binding.GraphQLDataBinder
+
+import org.grails.datastore.mapping.model.PersistentEntity
+
 class AuthenticationCheck extends BaseGraphQLFetcherInterceptor {
 
   // boolean	onCustomMutation(java.lang.String name, DataFetchingEnvironment environment)
@@ -73,6 +78,11 @@ class GraphQLFactory {
       interceptorManager.registerInterceptor(Book, new AuthenticationCheck() )
       interceptorManager.registerInterceptor(Author, new AuthenticationCheck() )
 
+      GraphQLDataBinderManager dataBinderManager = schema.dataBinderManager
+      dataBinderManager.registerDataBinder(Author, new SimpleGormEntityBinder(mappingContext, dataBinderManager) )
+      dataBinderManager.registerDataBinder(Book, new SimpleGormEntityBinder(mappingContext, dataBinderManager) )
+      dataBinderManager.registerDataBinder(ISBN, new SimpleGormEntityBinder(mappingContext, dataBinderManager) )
+      dataBinderManager.registerDataBinder(Library, new SimpleGormEntityBinder(mappingContext, dataBinderManager) )
       GraphQLSchema graphQLSchema = schema.generate()
 
       // Return the GraphQL bean.
