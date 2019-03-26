@@ -32,7 +32,7 @@ class Book implements GormEntity<Book> {
   }
 
   static constraints = {
-    // title unique: true
+    title unique: true
   }
 
   Library library
@@ -49,25 +49,16 @@ class AuthorCreateEntityDataFetcher extends CreateEntityDataFetcher<Author>{
 
   @Override
   Author get(DataFetchingEnvironment environment) {
-    println "CreateEntityDataFetcher......................"
     withTransaction(true) {
-      println "!!!!!!!!!!!!!!! in the transaction!!!!!!!!!"
       GormEntity instance = newInstance
       dataBinder.bind(instance, getArgument(environment))
-      println "binding complete..... checking for errors"
       try{
-      instance.save()
+        instance.save(true)
+        return instance
       }
       catch( excp ){
-        println "caught exception:  " + excp
+         throw new RuntimeException("Failed to save. ${excp}")
       }
-      if (instance.hasErrors()) {
-        println "errors in instance: " + instance.errors 
-      }
-      else{
-        println "no errors detected...."
-      }
-      instance
     }
   }
 
@@ -86,6 +77,9 @@ class Author implements GormEntity<Author> {
     }
   }
 
+  static constraints = {
+    fullName unique: true, email: true
+  }
   static mapping = {
     books lazy: false
   }

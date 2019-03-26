@@ -26,13 +26,10 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
   @Override
   void bind( Object entity, Map data ){
     bindEntity(entity,data)
-    // entity.save()
   }
 
   void bindEntity( Object entity, Map data ){
    
-    println "------------- begin bind entity ${entity} --------------"
-
     assert entity != null 
     assert data != null 
 
@@ -46,8 +43,6 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
       def persistentProperty = persistentEntity.getPropertyByName(entityProperty.key)
       if( persistentProperty == null || data.containsKey(entityProperty.key) == false )
         return;
-
-      println "retrieved persistent property ${persistentProperty} for ${entityProperty.key} -> ${data[entityProperty.key]}"
 
       switch( persistentProperty ){
 
@@ -87,7 +82,6 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
         
     }
 
-    println "------------- end bind entity ${entity} --------------"
   }
 
   void bindEntityCollection( Object owningEntity, PersistentProperty property, Collection items ){
@@ -107,7 +101,7 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
     else{
       entities.each{  
         if( it instanceof GormEntity ){
-          it.save()
+          it.save(validate:true)
         }
         owningEntity.addTo(property.name, it ) 
       }
@@ -116,7 +110,6 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
 
 
   Object createOrGetEntityAndBindData( PersistentEntity itemType, Object data ){
-    println "createOrGetEntityAndBindData -> ${itemType}, ${data}" 
     // if the data is a map
     def entity = null
 
@@ -127,11 +120,6 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
       else
         entity = itemType.newInstance() 
 
-      // use graphqlbindingmanager to lookup data binder
-      // bindEntity(entity,(Map)data)
-      println entity
-      println itemType
-      println data
       def binder = dataBinderManager.getDataBinder(entity.class) ?: this
       binder.bind( entity, (Map)data )
     }
@@ -141,4 +129,43 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
 
     return entity
   }
+
+  // List collectErrors(GormEntity entity, PersistentProperty persistentProperty){
+  //  
+  //   List errors = []
+
+  //   if( entity.hasErrors() ){
+  //     entity.errors.each{
+  //       errors.push( it )
+  //     }
+  //   }
+  //    
+  //   switch( persistentProperty ){
+
+  //     case {persistentProperty instanceof Simple}:
+  //       break;
+
+  //     case {persistentProperty instanceof Embedded}:
+  //     case {persistentProperty instanceof OneToOne}:
+  //     case {persistentProperty instanceof ManyToOne}:
+  //       errors.addAll( collectErrors(it, persistentProperty)  )
+  //       break
+  //     
+  //     case {persistentProperty instanceof Basic}:
+  //       // no error detecting needed
+  //       break;
+
+  //     case {persistentProperty instanceof OneToMany}:
+  //     case {persistentProperty instanceof ManyToMany}:
+  //       associatedEntity.each{ errors.addAll( collectErrors(associatedEntity, persistentProperty)  ) } 
+  //       break
+
+  //     case {persistentProperty instanceof EmbeddedCollection}:
+  //       // ?????
+  //       break
+  //   }
+ 
+  //   return errors 
+  // }
+
 }
