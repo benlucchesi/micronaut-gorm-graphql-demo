@@ -7,6 +7,10 @@ micronaut:
             paths: src/main
             restart: true
 
+grails.gorm.failOnError: true
+grails.gorm.flushMode: true
+
+
 ---
 hibernate:
   hbm2ddl:

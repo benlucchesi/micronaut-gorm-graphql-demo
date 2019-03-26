@@ -26,12 +26,7 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
   @Override
   void bind( Object entity, Map data ){
     bindEntity(entity,data)
-    try{
-       entity.save()
-    }
-    catch( excp ){
-       println excp.cause
-    }
+    // entity.save()
   }
 
   void bindEntity( Object entity, Map data ){
@@ -43,7 +38,7 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
 
     def persistentEntity = mappingContext.getPersistentEntity(entity.class.name)
     if( persistentEntity == null ){
-      return; // TOOD: toss an exception
+      throw new RuntimeException("PersistentEntity not mapped to ${entity.class.name}. ")
     }
 
     entity.properties.each{ entityProperty ->   
@@ -111,8 +106,9 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
     }
     else{
       entities.each{  
-        if( it instanceof GormEntity )
+        if( it instanceof GormEntity ){
           it.save()
+        }
         owningEntity.addTo(property.name, it ) 
       }
     }
@@ -131,7 +127,13 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
       else
         entity = itemType.newInstance() 
 
-      bindEntity(entity,(Map)data)
+      // use graphqlbindingmanager to lookup data binder
+      // bindEntity(entity,(Map)data)
+      println entity
+      println itemType
+      println data
+      def binder = dataBinderManager.getDataBinder(entity.class) ?: this
+      binder.bind( entity, (Map)data )
     }
     else{
       entity = data

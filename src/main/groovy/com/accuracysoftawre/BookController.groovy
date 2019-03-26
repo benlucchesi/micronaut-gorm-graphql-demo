@@ -11,6 +11,12 @@ import grails.gorm.transactions.Transactional
 import grails.gorm.annotation.Entity
 import org.grails.datastore.gorm.GormEntity
 
+import graphql.schema.DataFetchingEnvironment
+
+import org.grails.gorm.graphql.fetcher.impl.CreateEntityDataFetcher
+import org.grails.gorm.graphql.entity.dsl.GraphQLMapping
+import org.grails.datastore.mapping.model.PersistentEntity
+
 
 @Entity
 class Book implements GormEntity<Book> { 
@@ -35,10 +41,51 @@ class Book implements GormEntity<Book> {
   List<String> keyWords = []
 }
 
-@Entity
-class Author {
+class AuthorCreateEntityDataFetcher extends CreateEntityDataFetcher<Author>{
 
-  static graphql = true
+  AuthorCreateEntityDataFetcher(PersistentEntity entity) {
+    super(entity, null)
+  }
+
+  @Override
+  Author get(DataFetchingEnvironment environment) {
+    println "CreateEntityDataFetcher......................"
+    withTransaction(true) {
+      println "!!!!!!!!!!!!!!! in the transaction!!!!!!!!!"
+      GormEntity instance = newInstance
+      dataBinder.bind(instance, getArgument(environment))
+      println "binding complete..... checking for errors"
+      try{
+      instance.save()
+      }
+      catch( excp ){
+        println "caught exception:  " + excp
+      }
+      if (instance.hasErrors()) {
+        println "errors in instance: " + instance.errors 
+      }
+      else{
+        println "no errors detected...."
+      }
+      instance
+    }
+  }
+
+}
+
+
+@Entity
+class Author implements GormEntity<Author> {
+
+  // static graphql = true
+
+  static graphql = GraphQLMapping.lazy{
+    mutation('authorCreate', Author){
+      argument('author', Author)
+      dataFetcher(new AuthorCreateEntityDataFetcher(Author.gormPersistentEntity))
+    }
+  }
+
   static mapping = {
     books lazy: false
   }
