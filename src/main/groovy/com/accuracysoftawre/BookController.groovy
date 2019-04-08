@@ -49,7 +49,7 @@ class AuthorCreateEntityDataFetcher extends CreateEntityDataFetcher<Author>{
 
   @Override
   Author get(DataFetchingEnvironment environment) {
-    withTransaction(true) {
+    withTransaction(false) {
       GormEntity instance = newInstance
       dataBinder.bind(instance, getArgument(environment))
       try{
@@ -57,6 +57,7 @@ class AuthorCreateEntityDataFetcher extends CreateEntityDataFetcher<Author>{
         return instance
       }
       catch( excp ){
+        println instance.errors.allErrors
          throw new RuntimeException("Failed to save. ${excp}")
       }
     }

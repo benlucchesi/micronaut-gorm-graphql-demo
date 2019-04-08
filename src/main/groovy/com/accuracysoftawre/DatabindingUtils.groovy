@@ -26,6 +26,7 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
   @Override
   void bind( Object entity, Map data ){
     bindEntity(entity,data)
+    println "Entity Errors: ${entity.errors.allErrors}"
   }
 
   void bindEntity( Object entity, Map data ){
@@ -92,16 +93,22 @@ class SimpleGormEntityBinder implements GraphQLDataBinder {
 
     if( property.isBidirectional() ){
       if( property.isOwningSide() ){
-        entities.each{  owningEntity.addTo(property.name, it ) }
+        entities.each{  
+          println "1 - adding ${it} to ${owningEntity}" 
+          owningEntity.addTo(property.name, it ) 
+        }
       }
       else{
-        entities.each{ it.addTo(property.referencedPropertyName, owningEntity) }
+        entities.each{ 
+          println "2 - adding ${owningEntity} to ${it}" 
+          it.addTo(property.referencedPropertyName, owningEntity) 
+        }
       }
     }
     else{
       entities.each{  
         if( it instanceof GormEntity ){
-          it.save(validate:true)
+          it.save()
         }
         owningEntity.addTo(property.name, it ) 
       }
